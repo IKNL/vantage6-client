@@ -3,8 +3,8 @@
 This module is basically a high level interface to the central server.
 
 The module contains three communication classes: 1) The
-ClientNodeProtocol provides an interface from the Node to the central
-server, 2) The ClientUserProtocol provides an interface for users/
+NodeClient provides an interface from the Node to the central
+server, 2) The UserClient provides an interface for users/
 researchers and finally 3) The ClientContainerProtocol which provides
 an interface for algorithms to the central server (this is mainly used
 by master containers).
@@ -53,7 +53,7 @@ class WhoAmI(typing.NamedTuple):
         ">")
 
 
-class ClientBaseProtocol(object):
+class ClientBase(object):
     """Common interface to the central server.
 
     It manages the connection settings and constructs request paths,
@@ -426,7 +426,7 @@ class ClientBaseProtocol(object):
         return results
 
 
-class ClientUserProtocol(ClientBaseProtocol):
+class UserClient(ClientBase):
     """ User interface to the central server."""
 
     def authenticate(self, username: str, password: str):
@@ -439,7 +439,7 @@ class ClientUserProtocol(ClientBaseProtocol):
             :param username: username used to authenticate
             :param password: password used to authenticate
         """
-        super(ClientUserProtocol, self).authenticate({
+        super(UserClient, self).authenticate({
             "username": username,
             "password": password
         }, path="token/user")
@@ -482,4 +482,4 @@ class ClientUserProtocol(ClientBaseProtocol):
 
 
 # creat a simple alias
-Client = ClientUserProtocol
+Client = UserClient
