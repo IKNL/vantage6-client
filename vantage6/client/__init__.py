@@ -1,32 +1,18 @@
-""" Server IO
+"""
+Server IO
 
-This module is basically a high level interface to the central server.
-
-The module contains three communication classes: 1) The
-NodeClient provides an interface from the Node to the central
-server, 2) The UserClient provides an interface for users/
-researchers and finally 3) The ClientContainerProtocol which provides
-an interface for algorithms to the central server (this is mainly used
-by master containers).
+This module is an interface to the central server.
 """
 import logging
 import requests
-import time
 import jwt
-import datetime
 import typing
 import pickle
 
-from cryptography.hazmat.backends.openssl.rsa import _RSAPrivateKey
-
-from ._version import version_info, __version__
 from vantage6.client.encryption import CryptorBase, RSACryptor, DummyCryptor
-from vantage6.common import (
-    bytes_to_base64s,
-    base64s_to_bytes
-)
 
 module_name = __name__.split('.')[1]
+
 
 class ServerInfo(typing.NamedTuple):
     """ Data-class to store the server info
@@ -47,10 +33,10 @@ class WhoAmI(typing.NamedTuple):
 
     def __repr__(self) -> str:
         return (f"<WhoAmI "
-            f"name={self.name}, "
-            f"type={self.type_}, "
-            f"organization={self.organization_name}"
-        ">")
+                f"name={self.name}, "
+                f"type={self.type_}, "
+                f"organization={self.organization_name}"
+                ">")
 
 
 class ClientBase(object):
@@ -60,8 +46,8 @@ class ClientBase(object):
     allows for authentication task creation and result retrieval.
     """
 
-    def __init__(self, host: str, port: int, path: str='/api',
-        private_key_file:str=None):
+    def __init__(self, host: str, port: int, path: str = '/api',
+                 private_key_file: str = None):
         """ Initialization of the communcation protocol class.
 
             :param host: hostname/ip including protocol (http/https)
@@ -143,7 +129,8 @@ class ClientBase(object):
         # self.log.debug(f"Generated path to {path}")
         return path
 
-    def request(self, endpoint: str, json: dict=None, method: str='get', params=None, first_try=False):
+    def request(self, endpoint: str, json: dict = None, method: str = 'get',
+                params=None, first_try=False):
         """ Create HTTP(S) request to the central server.
 
             It can contain a payload (JSON) in case of a POST method.
@@ -170,18 +157,21 @@ class ClientBase(object):
         # send request to server
         url = self.generate_path_to(endpoint)
         self.log.debug(f'Making request: {method.upper()} | {url} | {params}')
-        response = rest_method(url, json=json, headers=self.headers, params=params)
+        response = rest_method(url, json=json, headers=self.headers,
+                               params=params)
 
         # server says no!
         if response.status_code > 210:
             # self.log.debug(f"Server did respond code={response.status_code}\
             #     and message={response.get('msg', 'None')}")
-            self.log.error(f'Server responded with error code: {response.status_code} ')
-            self.log.debug(response.json().get("msg",""))
+            self.log.error(
+                f'Server responded with error code: {response.status_code}')
+            self.log.debug(response.json().get("msg", ""))
 
             if first_try:
                 self.refresh_token()
-                return self.request(endpoint, json, method, params, first_try=True)
+                return self.request(endpoint, json, method, params,
+                                    first_try=True)
             else:
                 self.log.error("Nope, refreshing the token didn't fix it.")
 
@@ -205,8 +195,10 @@ class ClientBase(object):
             TODO update other parties when a new public_key is posted
             TODO clean up this method can be shorter
         """
-        assert self._access_token, "Encryption can only be setup after authentication"
-        assert self.whoami.organization_id, "Organization unknown... Did you authenticate?"
+        assert self._access_token, \
+            "Encryption can only be setup after authentication"
+        assert self.whoami.organization_id, \
+            "Organization unknown... Did you authenticate?"
 
         if private_key_file is None:
             self.cryptor = DummyCryptor()
@@ -218,7 +210,8 @@ class ClientBase(object):
         # not the case, this node will not be able to read any messages
         # that are send to him! If this is the case, the new public_key
         # will be uploaded to the central server
-        organization = self.request(f"organization/{self.whoami.organization_id}")
+        organization = self.request(
+            f"organization/{self.whoami.organization_id}")
         pub_key = organization.get("public_key")
         upload_pub_key = False
 
@@ -287,7 +280,6 @@ class ClientBase(object):
         assert self.__refresh_url, \
             "Refresh URL not found, did you authenticate?"
 
-
         # if no port is specified explicit, then it should be omnit the
         # colon : in the path. Similar (but different) to the property
         # base_path
@@ -309,7 +301,8 @@ class ClientBase(object):
         self._access_token = response.json()["access_token"]
 
     def post_task(self, name: str, image: str, collaboration_id: int,
-        input_: bytes=b'', description='', organization_ids: list=None) -> dict:
+                  input_: bytes = b'', description='',
+                  organization_ids: list = None) -> dict:
         """ Post a new task at the server.
 
             It will also encrypt `input_` for each receiving
@@ -352,7 +345,7 @@ class ClientBase(object):
         })
 
     def get_results(self, id=None, state=None, include_task=False,
-        task_id=None, node_id=None):
+                    task_id=None, node_id=None):
         """Get task result(s) from the central server.
 
             Depending if a `id` is specified or not, either a single or
@@ -380,7 +373,7 @@ class ClientBase(object):
             cryptor = self.cryptor
             try:
                 self.log.info('Decrypting input')
-                #TODO this only works when the results belong to the
+                # TODO this only works when the results belong to the
                 # same organization... We should make different implementation
                 # of get_results
                 res["input"] = cryptor.decrypt_str_to_bytes(res["input"])
@@ -411,7 +404,7 @@ class ClientBase(object):
         if node_id:
             params['node_id'] = node_id
 
-        # self.log.debug(f"Retrieving results using query parameters: {params}")
+        # self.log.debug(f"Retrieving results using query parameters:{params}")
         results = self.request(endpoint=endpoint, params=params)
 
         if id:
@@ -479,7 +472,6 @@ class UserClient(ClientBase):
         return unpacked_results
 
 
-
-
-# creat a simple alias
+# For backwards compatibility
 Client = UserClient
+ClientBaseProtocol = ClientBase
