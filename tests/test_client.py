@@ -20,15 +20,19 @@ ORGANIZATION_IDS = [1]
 
 
 def test_post_task_legacy_method():
+    input_ = {'method': TASK_NAME}
+
+    decoded_input = post_task_on_mock_client(input_)
+
+    assert {'method': TASK_NAME} == decoded_input
+
+
+def post_task_on_mock_client(input_):
     mock_jwt = MagicMock()
     mock_jwt.decode.return_value = {'identity': FAKE_ID}
-
     mock_requests = MagicMock()
     mock_requests.get.return_value.status_code = 200
     mock_requests.post.return_value.status_code = 200
-
-    input_ = {'method': TASK_NAME}
-
     with patch.multiple('vantage6.client', requests=mock_requests, jwt=mock_jwt):
         client = Client(HOST, PORT)
         client.authenticate(USERNAME, PASSWORD)
@@ -45,5 +49,6 @@ def test_post_task_legacy_method():
 
         decoded_input = base64.b64decode(post_input)
         decoded_input = pickle.loads(decoded_input)
+    return decoded_input
 
-        assert {'method': TASK_NAME} == decoded_input
+
