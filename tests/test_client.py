@@ -1,5 +1,8 @@
 from vantage6.client import Client
 from unittest.mock import patch, MagicMock
+import base64
+import pickle
+import io
 
 # Mock server
 HOST = 'mock_server'
@@ -16,7 +19,7 @@ COLLABORATION_ID = 1
 ORGANIZATION_IDS = [1]
 
 
-def test_post_task():
+def test_post_task_legacy_method():
     mock_jwt = MagicMock()
     mock_jwt.decode.return_value = {'identity': FAKE_ID}
 
@@ -29,8 +32,18 @@ def test_post_task():
     with patch.multiple('vantage6.client', requests=mock_requests, jwt=mock_jwt):
         client = Client(HOST, PORT)
         client.authenticate(USERNAME, PASSWORD)
-        client.setup_encryption(None, disabled=True)
+        client.setup_encryption(None)
 
         client.post_task(name=TASK_NAME, image=TASK_IMAGE, collaboration_id=COLLABORATION_ID,
                          organization_ids=ORGANIZATION_IDS, input_=input_)
-        pass
+
+        # In a request.post call, json is provided with the keyword argument 'json'
+        # call_args provides a tuple with positional arguments followed by a dict with positional arguments
+        post_content = mock_requests.post.call_args[1]['json']
+
+        post_input = post_content['organizations'][0]['input']
+
+        decoded_input = base64.b64decode(post_input)
+        decoded_input = pickle.loads(decoded_input)
+
+        assert {'method': TASK_NAME} == decoded_input
