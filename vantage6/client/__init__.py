@@ -301,7 +301,7 @@ class ClientBase(object):
         self._access_token = response.json()["access_token"]
 
     def post_task(self, name: str, image: str, collaboration_id: int,
-                  input_: bytes = b'', description='',
+                  input_='', description='',
                   organization_ids: list = None) -> dict:
         """ Post a new task at the server.
 
