@@ -4,12 +4,12 @@ import pickle
 _serializers = {}
 
 
-def serialize(data, data_format):
+def serialize(data, data_format) -> bytes:
     """
-    Lookup data_format in serializer mapping and return the associated
+    Serialize data using the specified format
     :param data: the data to be serialized
-    :param data_format:
-    :return:
+    :param data_format: the desired data format. Valid options are 'json', 'pickle'.
+    :return: a bytes-like object in the specified serialization format
     """
     try:
         return _serializers[data_format.lower()](data)
@@ -36,10 +36,10 @@ def serializer(data_format):
 
 
 @serializer('json')
-def serialize_json(file):
-    return json.dump(file)
+def serialize_json(file) -> bytes:
+    return json.dumps(file).encode()
 
 
 @serializer('pickle')
-def serialize_pickle(file):
-    return pickle.dump(file)
+def serialize_pickle(file) -> bytes:
+    return pickle.dumps(file)
