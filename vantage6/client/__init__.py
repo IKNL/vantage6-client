@@ -333,6 +333,8 @@ class ClientBase(object):
         if data_format == LEGACY:
             serialized_input = pickle.dumps(input_)
         else:
+            # Data will be serialized to bytes in the specified data format.
+            # It will be prepended with 'DATA_FORMAT.' in unicode.
             serialized_input = data_format.encode() + b'.' + serialization.serialize(input_, data_format)
 
         organization_json_list = []
