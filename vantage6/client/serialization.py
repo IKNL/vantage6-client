@@ -13,7 +13,7 @@ def serialize(data, data_format) -> bytes:
     """
     try:
         return _serializers[data_format.lower()](data)
-    except KeyError as e:
+    except KeyError:
         raise Exception(f'Serialization of {data_format} has not been implemented.')
 
 

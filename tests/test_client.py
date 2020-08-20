@@ -1,18 +1,17 @@
-from unittest import TestCase
-
-from vantage6.client import Client
-from unittest.mock import patch, MagicMock
 import base64
 import pickle
-import io
+from unittest import TestCase
+from unittest.mock import patch, MagicMock
+
+from vantage6.client import Client
 
 # Mock server
 HOST = 'mock_server'
 PORT = 1234
 
 # Mock credentials
-USERNAME = 'vantage6_test'
-PASSWORD = 'secretpassword'
+FAKE_USERNAME = 'vantage6_test'
+FAKE_PASSWORD = 'secretpassword'
 FAKE_ID = 1
 
 TASK_NAME = 'test-task'
@@ -52,7 +51,7 @@ class TestClient(TestCase):
         mock_requests.post.return_value.status_code = 200
         with patch.multiple('vantage6.client', requests=mock_requests, jwt=mock_jwt):
             client = Client(HOST, PORT)
-            client.authenticate(USERNAME, PASSWORD)
+            client.authenticate(FAKE_USERNAME, FAKE_PASSWORD)
             client.setup_encryption(None)
 
             client.post_task(name=TASK_NAME, image=TASK_IMAGE, collaboration_id=COLLABORATION_ID,
