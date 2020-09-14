@@ -26,7 +26,7 @@ def deserialize(file, data_format):
     """
     try:
         return _deserializers[data_format.lower()](file)
-    except KeyError as e:
+    except KeyError:
         raise Exception(f'Deserialization of {data_format} has not been implemented.')
 
 
