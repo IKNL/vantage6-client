@@ -25,6 +25,16 @@ _MAX_FORMAT_STRING_LENGTH = 10
 _SPARQL_RETURN_FORMAT = CSV
 
 
+def docker_wrapper(module: str):
+    wrapper = DockerWrapper()
+    wrapper.wrap_algorithm(module)
+
+
+def sparql_wrapper(module: str):
+    wrapper = SparqlDockerWrapper()
+    wrapper.wrap_algorithm(module)
+
+
 class WrapperBase:
 
     def wrap_algorithm(self, module):
@@ -107,7 +117,7 @@ class DockerWrapper(WrapperBase):
         return pandas.read_csv(database_uri)
 
 
-class SparqlWrapper(WrapperBase):
+class SparqlDockerWrapper(WrapperBase):
     def load_data(self, database_uri, input_data):
         query = input_data['query']
         database_uri = self._fix_endpoint(database_uri)
@@ -135,11 +145,6 @@ class SparqlWrapper(WrapperBase):
         result = sparql.query().convert().decode()
 
         return pandas.read_csv(io.StringIO(result))
-
-
-def docker_wrapper(module: str):
-    wrapper = DockerWrapper()
-    wrapper.wrap_algorithm(module)
 
 
 def write_output(output_format, output, output_file):
