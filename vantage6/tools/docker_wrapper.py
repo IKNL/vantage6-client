@@ -120,22 +120,7 @@ class DockerWrapper(WrapperBase):
 class SparqlDockerWrapper(WrapperBase):
     def load_data(self, database_uri, input_data):
         query = input_data['query']
-        database_uri = self._fix_endpoint(database_uri)
         return self._query_triplestore(database_uri, query)
-
-    # TODO: Remove when fix on node side has been released.
-    @staticmethod
-    def _fix_endpoint(endpoint: str) -> str:
-        """
-        Remove all text before "http".
-        Workaround because the endpoint is automatically prefixed with the data folder. However this does not make sense for
-        a sparql endpoint.
-
-        :param endpoint:
-        :return:
-        """
-        idx = endpoint.find('http')
-        return endpoint[idx:]
 
     @staticmethod
     def _query_triplestore(endpoint: str, query: str):
