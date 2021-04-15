@@ -142,7 +142,8 @@ def run_docker_wrapper_with_echo_db(input_file, tmp_path):
 @patch('vantage6.tools.docker_wrapper.dispact_rpc')
 @patch('vantage6.tools.docker_wrapper.os')
 @patch('vantage6.tools.docker_wrapper.SPARQLWrapper')
-def test_wrapper_passes_dataframe(SPARQLWrapper: MagicMock, os: MagicMock, dispact_rpc: MagicMock, tmp_path: Path):
+def test_sparql_docker_wrapper_passes_dataframe(SPARQLWrapper: MagicMock, os: MagicMock, dispact_rpc: MagicMock,
+                                        tmp_path: Path):
     input_file = tmp_path / 'input_file.pkl'
     token_file = tmp_path / 'token.txt'
     output_file = tmp_path / 'output.pkl'
@@ -171,4 +172,3 @@ def test_wrapper_passes_dataframe(SPARQLWrapper: MagicMock, os: MagicMock, dispa
 
     target_df = pd.DataFrame([[1, 2]], columns=['column1', 'column2'])
     pd.testing.assert_frame_equal(target_df, dispact_rpc.call_args[0][0])
-
