@@ -8,7 +8,7 @@ algorithms with uniform input and output handling.
 import os
 import pickle
 import io
-
+from abc import ABC, abstractmethod
 import pandas
 
 from vantage6.tools.dispatch_rpc import dispact_rpc
@@ -35,7 +35,7 @@ def sparql_wrapper(module: str):
     wrapper.wrap_algorithm(module)
 
 
-class WrapperBase:
+class WrapperBase(ABC):
 
     def wrap_algorithm(self, module):
         """
@@ -108,19 +108,23 @@ class WrapperBase:
         output_format = input_data.get('output_format', None)
         write_output(output_format, output, output_file)
 
-    def load_data(self, database_uri, input_data):
-        return
+    @staticmethod
+    @abstractmethod
+    def load_data(database_uri, input_data):
+        pass
 
 
 class DockerWrapper(WrapperBase):
-    def load_data(self, database_uri, input_data):
+    @staticmethod
+    def load_data(database_uri, input_data):
         return pandas.read_csv(database_uri)
 
 
 class SparqlDockerWrapper(WrapperBase):
-    def load_data(self, database_uri, input_data):
+    @staticmethod
+    def load_data(database_uri, input_data):
         query = input_data['query']
-        return self._query_triplestore(database_uri, query)
+        return SparqlDockerWrapper._query_triplestore(database_uri, query)
 
     @staticmethod
     def _query_triplestore(endpoint: str, query: str):
