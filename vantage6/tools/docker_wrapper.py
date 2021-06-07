@@ -109,7 +109,7 @@ class WrapperBase:
         write_output(output_format, output, output_file)
 
     def load_data(self, database_uri, input_data):
-        pass
+        return
 
 
 class DockerWrapper(WrapperBase):
